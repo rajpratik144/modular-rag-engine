@@ -1,4 +1,4 @@
-This is the professional `README.md` for your library. It is designed to be the "source of truth" for any developer who wants to use your system. 
+It is designed to be the "source of truth" for any developer who wants to use the system. 
 
 It explains the **Architecture**, the **Installation**, and provides a **Complete End-to-End Example** of building a Document Bot from scratch.
 
@@ -35,8 +35,7 @@ To run this engine, you must provide your own "Fuel" (API Keys) from the followi
 Install the library directly from your GitHub repository by adding this to your `requirements.txt`:
 
 ```text
-git+https://github.com/YOUR_USERNAME/modular_rag_system.git
-```
+rag_engine @ git+https://github.com/rajpratik144/modular-rag-engine.git```
 
 Or install via terminal:
 ```bash
