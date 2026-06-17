@@ -1,0 +1,146 @@
+This is the professional `README.md` for your library. It is designed to be the "source of truth" for any developer who wants to use your system. 
+
+It explains the **Architecture**, the **Installation**, and provides a **Complete End-to-End Example** of building a Document Bot from scratch.
+
+---
+
+# 📚 Modular Multimodal RAG Engine
+> **A High-Performance, Provider-Agnostic Intelligence Layer for Document Reasoning.**
+
+The **Modular RAG Engine** is a professional-grade Python library that enables developers to build sophisticated AI systems capable of reading, remembering, and reasoning over complex, unstructured data. 
+
+Unlike standard RAG tutorials, this library is built for **Production**:
+*   **Multi-Modal Vision:** Understands charts, tables, and diagrams.
+*   **Provider Agnostic:** Inject any LLM (OpenAI, Gemini, Groq, Anthropic).
+*   **Multi-Tenant:** Built-in isolation ensures User A never sees User B's data.
+*   **Atomic Ingestion:** Fingerprinting (SHA-256) prevents duplicate costs and data corruption.
+
+---
+
+## 🛠 Prerequisites
+
+To run this engine, you must provide your own "Fuel" (API Keys) from the following providers:
+
+| Provider | Purpose |
+| :--- | :--- |
+| **LlamaCloud** | Advanced Multimodal Document Parsing (Vision). |
+| **Pinecone** | Serverless Vector Database for semantic search. |
+| **Supabase** | PostgreSQL Database for metadata and chat history. |
+| **Google/Groq** | Inference models for planning and answering. |
+
+---
+
+## 🚀 Installation
+
+Install the library directly from your GitHub repository by adding this to your `requirements.txt`:
+
+```text
+git+https://github.com/YOUR_USERNAME/modular_rag_system.git
+```
+
+Or install via terminal:
+```bash
+pip install git+https://github.com/YOUR_USERNAME/modular_rag_system.git
+```
+
+---
+
+## 📖 API Reference: The "Engine & Fuel" Concept
+
+The system uses **Dependency Injection**. You initialize your AI "Brain" (the LLM object) and "inject" it into our Engine.
+
+### 1. The Configuration Object
+Every method requires a `config` dictionary.
+
+| Key | Required | Description |
+| :--- | :--- | :--- |
+| `LLAMA_CLOUD_API_KEY` | Yes | API Key for document parsing. |
+| `SUPABASE_URL` | Yes | Your Supabase project URL. |
+| `SUPABASE_KEY` | Yes | Your Supabase Anon/Public Key. |
+| `PINECONE_API_KEY` | Yes | Your Pinecone API Key. |
+| `PINECONE_INDEX_NAME`| Yes | The name of your 768-dim index. |
+| `GOOGLE_API_KEY` | Yes* | Required if using Google Gemini Embeddings. |
+| `VISION_MODEL` | No | Default: `openai-gpt4o-mini`. |
+
+### 2. Core Methods
+
+*   `RAGCoreEngine(config, planner_llm, brain_llm, system_persona=None)`: Initializes the engine.
+*   `.ingest(file_paths, user_id)`: Fingerprints, parses, embeds, and stores documents.
+*   `.ask(question, user_id, chat_history=None)`: Performs multi-query search and returns a response.
+*   `.delete_files(doc_id, user_id)`: Surgically removes data from all databases.
+
+---
+
+## 🤖 Example: Building a "Legal Analyst" Bot
+Here is a complete script showing how to build a new system using the library in under 50 lines of code.
+
+```python
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+from rag_engine.core.engine import RAGCoreEngine
+
+# 1. SETUP FUEL (Credentials)
+config = {
+    "LLAMA_CLOUD_API_KEY": "llx-...",
+    "SUPABASE_URL": "https://xyz.supabase.co",
+    "SUPABASE_KEY": "eyJhb...",
+    "PINECONE_API_KEY": "pcsk_...",
+    "PINECONE_INDEX_NAME": "modular-rag",
+    "GOOGLE_API_KEY": "AIza...",
+    "VISION_MODEL": "openai-gpt4o-mini"
+}
+
+# 2. CHOOSE THE BRAIN (Object Injection)
+# We choose Gemini-1.5-Flash for speed and cost efficiency
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", api_key=config["GOOGLE_API_KEY"])
+
+# 3. DEFINE PERSONALITY (Optional)
+legal_persona = "You are a cautious Legal Assistant. Always cite page numbers."
+
+# 4. INITIALIZE THE ENGINE
+engine = RAGCoreEngine(config, planner_llm=llm, brain_llm=llm, system_persona=legal_persona)
+
+# 5. INGESTION (Adding knowledge)
+user_id = "client_abc_99"
+my_docs = ["./contracts/lease_agreement.pdf"]
+doc_ids = engine.ingest(my_docs, user_id)
+
+# 6. QUERYING (Talking to the bot)
+chat_history = [] 
+question = "When does the lease expire and what is the penalty for late payment?"
+
+answer = engine.ask(question, user_id, chat_history=chat_history)
+
+print(f"AI ANALYST: {answer}")
+
+# 7. MEMORY UPDATE (Parent system responsibility)
+chat_history.append(f"User: {question}")
+chat_history.append(f"AI: {answer}")
+```
+
+---
+
+## 🏗 Modular Architecture
+The library is split into three independent pillars to ensure stability:
+
+1.  **`rag_engine.parsers`**: The "Eyes." Uses Cloud Multimodal Vision to convert messy files into structured Markdown.
+2.  **`rag_engine.storage`**: The "Vault." Manages SHA-256 fingerprinting and dual-database synchronization (SQL + Vector).
+3.  **`rag_engine.core`**: The "Brain." Implements Multi-Query Retrieval and Stateless Context management.
+
+---
+
+## 🛡 Security & Multi-Tenancy
+This library enforces **Logical Data Isolation**. 
+Every operation (Ingest, Ask, Delete) requires a `user_id`. The engine automatically applies a database filter `metadata.user_id == requested_user_id`. This ensures that even in a shared database, users can only see their own files.
+
+---
+
+### **Clean Room Development Note**
+This library is optimized for low-end hardware (tested on 2015 MacBook Air). All heavy computations (OCR, Embedding, Inference) are offloaded to Cloud APIs, maintaining a tiny local memory footprint.
+
+---
+
+**Author:** Pratik Raj  
+**Version:** 0.1.0 (Beta)
+
+---

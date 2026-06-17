@@ -1,0 +1,27 @@
+__pycache__/
+*.log
+.env
+env_rag/
+.DS_Store
+
+cat << EOF > .gitignore
+# Environments
+env_rag/
+venv/
+.env
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+rag_system.log
+
+# Mac specific
+.DS_Store
+
+# User Data
+data/
+EOF

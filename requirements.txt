@@ -1,0 +1,17 @@
+langchain
+langchain-community
+langchain-core
+langchain-groq
+langchain-google-genai
+google-genai
+pydantic
+llama-parse
+python-magic
+pinecone
+supabase
+flashrank
+numpy
+python-dotenv
+requests
+flashrank
+rank_bm25
