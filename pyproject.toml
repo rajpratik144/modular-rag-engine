@@ -1,0 +1,40 @@
+[build-system]
+# Tells Python which tool to use to build your library
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# The name people will use to install your library
+name = "rag_engine"
+version = "0.1.0"
+description = "A modular, multimodal, provider-agnostic RAG engine for document intelligence."
+readme = "README.md"
+authors = [
+    {name = "Pratik Raj"}
+]
+# Requires Python 3.9 or higher (common for modern AI libraries)
+requires-python = ">=3.9"
+
+# These are the 'dependencies'. 
+# When someone installs your library, Python will automatically download these:
+dependencies = [
+    "langchain",
+    "langchain-community",
+    "langchain-core",
+    "langchain-groq",
+    "langchain-google-genai",
+    "google-genai",
+    "llama-parse",
+    "pinecone-client",
+    "supabase",
+    "flashrank",
+    "rank_bm25",
+    "python-dotenv",
+    "requests",
+    "pydantic"
+]
+
+[tool.setuptools.packages.find]
+# This tells Python to look for the code inside the 'rag_engine' folder
+where = ["."]
+include = ["rag_engine*"]
