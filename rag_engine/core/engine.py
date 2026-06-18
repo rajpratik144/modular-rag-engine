@@ -54,6 +54,6 @@ class RAGCoreEngine:
         """Returns a full string answer (Blocking)."""
         return self.query_engine.ask(question, user_id, chat_history)
 
-    def stream_ask(self, question: str, user_id: str, chat_history: List[str] = None):
+    def stream_ask(self, question: str, user_id: str, chat_history: list = None):
         """Returns a Python Generator for real-time chunks (Streaming)."""
         return self.query_engine.stream_ask(question, user_id, chat_history)
