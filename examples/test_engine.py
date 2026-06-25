@@ -10,14 +10,14 @@ load_dotenv()
 # 2. THE FUEL: Credentials & Settings
 config = {
     "LLAMA_CLOUD_API_KEY": os.getenv("LLAMA_CLOUD_API_KEY"),
-    "SUPABASE_URL": os.getenv("SUPABASE_URL"),
-    "SUPABASE_KEY": os.getenv("SUPABASE_KEY"),
+    "DATABASE_URL": os.getenv("DATABASE_URL"),
     "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY"),
     "PINECONE_INDEX_NAME": os.getenv("PINECONE_INDEX_NAME"),
     "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"),
-    "VISION_MODEL": os.getenv("VISION_MODEL"),# e.g., "openai-gpt4o"
-    "GROQ_API_KEY": os.getenv("GROQ_API_KEY")
+    "GROQ_API_KEY": os.getenv("GROQ_API_KEY"),
+    "VISION_MODEL": os.getenv("VISION_MODEL")
 }
+
 
 # 3. OBJECT INJECTION: Initialize the LLM here
 # This is where you solve the 'model' vs 'model_name' issue once and for all
@@ -33,7 +33,7 @@ engine = RAGCoreEngine(config, planner_llm=llm_object, brain_llm=llm_object)
 
 # 5. RUN INGESTION
 user_id = "user_pratik_002"
-file_path = "hr_poilcy.md"
+file_path = "data/hr_poilcy.md"
 
 print(f"\n📂 Starting ingestion for: {file_path}")
 doc_ids = engine.ingest([file_path], user_id)

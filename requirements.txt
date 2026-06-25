@@ -8,10 +8,10 @@ pydantic
 llama-parse
 python-magic
 pinecone
-supabase
 flashrank
 numpy
 python-dotenv
 requests
-flashrank
 rank_bm25
+sqlalchemy 
+psycopg2-binary

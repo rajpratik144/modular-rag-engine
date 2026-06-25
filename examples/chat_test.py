@@ -9,8 +9,7 @@ load_dotenv()
 
 config = {
     "LLAMA_CLOUD_API_KEY": os.getenv("LLAMA_CLOUD_API_KEY"),
-    "SUPABASE_URL": os.getenv("SUPABASE_URL"),
-    "SUPABASE_KEY": os.getenv("SUPABASE_KEY"),
+    "DATABASE_URL": os.getenv("DATABASE_URL"),
     "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY"),
     "PINECONE_INDEX_NAME": os.getenv("PINECONE_INDEX_NAME"),
     "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"),
@@ -32,7 +31,7 @@ llm = ChatGroq(
 engine = RAGCoreEngine(config, planner_llm=llm, brain_llm=llm)
 
 # 5. Interactive Chat Loop with STREAMING
-user_id = "pratik"
+user_id = "user_pratik_002"
 chat_memory = []
 
 print("\n" + "="*50)
