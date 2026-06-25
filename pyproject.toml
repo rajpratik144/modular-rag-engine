@@ -26,7 +26,6 @@ dependencies = [
     "google-genai",
     "llama-parse",
     "pinecone",
-    "supabase",
     "flashrank",
     "rank_bm25",
     "python-dotenv",
