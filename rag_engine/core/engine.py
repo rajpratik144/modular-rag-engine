@@ -46,6 +46,10 @@ class RAGCoreEngine:
         
         return final_doc_ids
     
+    def get_user_files(self, user_id: str):
+        """Bridge to the storage manager's file listing."""
+        return self.storage.get_user_files(user_id)
+    
     def delete_files(self, doc_id: str, user_id: str) -> bool:
         """Removes document from Pinecone and Supabase."""
         return self.storage.delete_document(doc_id, user_id)
