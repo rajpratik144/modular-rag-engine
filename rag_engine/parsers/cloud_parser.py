@@ -18,6 +18,7 @@ class UniversalParser:
         self.parser = LlamaParse(
             api_key=api_key,
             result_type=ResultType.MD,
+            tier="agentic",
             use_vendor_multimodal_model=True,
             vendor_multimodal_model_name=vision_model,
             num_workers=workers,
