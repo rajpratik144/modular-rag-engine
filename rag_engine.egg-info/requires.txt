@@ -4,11 +4,12 @@ langchain-core
 langchain-groq
 langchain-google-genai
 google-genai
-llama-parse
+llama-cloud>=2.10.0
 pinecone
-supabase
 flashrank
 rank_bm25
 python-dotenv
 requests
 pydantic
+sqlalchemy
+psycopg2-binary

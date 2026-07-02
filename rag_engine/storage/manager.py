@@ -103,10 +103,11 @@ class StorageManager:
                 metadata = {
                     "user_id": user_id,
                     "doc_id": doc_id,
-                    "text": part['content'],
+                    "text": part["content"][:8000],      # Safety limit
                     "file_name": file_name,
-                    "page_number": page_val
-                }
+                    "page_number": page_val,
+                    "content_type": part["metadata"].get("content_type","page",),}
+                
                 vectors_to_upsert.append((chunk_id, all_vectors[i], metadata))
 
             self.index.upsert(vectors=vectors_to_upsert)

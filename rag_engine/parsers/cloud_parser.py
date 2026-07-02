@@ -2,73 +2,170 @@
 # File: rag_engine/parsers/cloud_parser.py
 # ==========================================
 
-
+import asyncio
 import os
-from llama_parse import LlamaParse, ResultType
+
+from llama_cloud import LlamaCloud
+
 from ..core.logger import get_logger
+
 
 class UniversalParser:
     def __init__(self, config):
         self.log = get_logger("UniversalParser")
-        
-        api_key = config.get("LLAMA_CLOUD_API_KEY")
-        vision_model = config.get("VISION_MODEL", "openai-gpt-4o-mini")
-        workers = config.get("PARSER_WORKERS", 1)
 
-        # REFINED "SMART HYBRID" INSTRUCTION
-        smart_prompt = """
-        This document contains a mix of standard text and visual elements. 
-        1. If a page is pure text, extract it accurately as Markdown.
-        2. IF AND ONLY IF a page contains images, flowcharts, or diagrams:
-           - Describe the visual content in detail within the context of the text.
-           - For flowcharts, describe the step-by-step logic.
-        3. For tables (whether images or text), always convert them to clean Markdown tables.
-        """
-
-        self.parser = LlamaParse(
-            api_key=api_key,
-            result_type=ResultType.MD,
-            tier="agentic",
-            use_vendor_multimodal_model=True,
-            vendor_multimodal_model_name=vision_model,
-            system_prompt=smart_prompt,
-            num_workers=workers,
-            verbose=True,
-            language="en"
+        self.client = LlamaCloud(
+            api_key=config.get("LLAMA_CLOUD_API_KEY")
         )
 
-    def parse_files(self, file_paths):
-        self.log.info(f"Starting Visual Parsing for {len(file_paths)} files...")
+        self.tier = config.get("PARSER_TIER", "agentic")
+        self.version = config.get("PARSER_VERSION", "latest")
+
+    async def _parse_single_file(self, path: str):
+        self.log.info(f"Parsing {path}")
+
+        result = await asyncio.to_thread(
+            self.client.parsing.parse,
+            upload_file=path,
+            tier=self.tier,
+            version=self.version,
+            expand=["items"],
+            verbose=True,
+        )
+
+        data = result.items.model_dump()
+
+        final_pages = []
+
+        for page in data["pages"]:
+
+            page_content = []
+
+            for item in page["items"]:
+
+                item_type = item.get("type", "")
+
+                # -----------------------------
+                # Skip useless repeated content
+                # -----------------------------
+                if item_type == "footer":
+                    continue
+
+                value = item.get("value", "")
+
+                if (
+                    item_type == "text"
+                    and isinstance(value, str)
+                    and "logo" in value.lower()
+                ):
+                    continue
+
+                # -----------------------------
+                # Headings
+                # -----------------------------
+                if item_type == "heading":
+
+                    page_content.append(item.get("md", value))
+
+                # -----------------------------
+                # Tables
+                # -----------------------------
+                elif item_type == "table":
+
+                    page_content.append(item.get("md", ""))
+
+                # -----------------------------
+                # Normal Text
+                # -----------------------------
+                elif item_type == "text":
+
+                    page_content.append(value)
+
+                # -----------------------------
+                # Diagrams (Future Compatible)
+                # -----------------------------
+                elif item_type == "diagram":
+
+                    if item.get("mermaid"):
+
+                        page_content.append(
+                            f"```mermaid\n{item['mermaid']}\n```"
+                        )
+
+                    elif value:
+
+                        page_content.append(value)
+
+                # -----------------------------
+                # Images
+                # -----------------------------
+                elif item_type == "image":
+
+                    if value:
+
+                        page_content.append(
+                            f"Image Description:\n{value}"
+                        )
+
+                # -----------------------------
+                # Unknown future types
+                # -----------------------------
+                else:
+
+                    if item.get("md"):
+
+                        page_content.append(item["md"])
+
+                    elif value:
+
+                        page_content.append(value)
+
+            content = "\n\n".join(page_content).strip()
+
+            if not content:
+                continue
+
+            metadata = {
+                "source_path": path,
+                "file_name": os.path.basename(path),
+                "page_number": page["page_number"],
+                "file_type": os.path.splitext(path)[1].replace(".", "").lower(),
+            }
+
+            final_pages.append(
+                {
+                    "content": content,
+                    "metadata": metadata,
+                }
+            )
+
+        return final_pages
+
+    async def parse_files(self, file_paths):
+        self.log.info(
+            f"Starting Visual Parsing for {len(file_paths)} files..."
+        )
 
         try:
-            documents = self.parser.load_data(file_paths)
+
             final_data = []
 
-            for i, doc in enumerate(documents):
-                # 1. Try to get page number from API
-                # 2. If missing, assume (index + 1) because files are read in order
-                page_num = doc.metadata.get("page_number")
-                if page_num is None:
-                    page_num = i + 1 
-                
-                source_path = doc.metadata.get("file_path") or file_paths[0]
-                file_name = os.path.basename(source_path)
+            for path in file_paths:
 
-                metadata = {
-                    "source_path": source_path,
-                    "file_name": file_name,
-                    "page_number": int(page_num), # Force it to be a Number
-                    "file_type": file_name.split('.')[-1].lower()
-                }
+                pages = await self._parse_single_file(path)
 
-                final_data.append({
-                    "content": doc.text,
-                    "metadata": metadata
-                })
+                final_data.extend(pages)
 
-            self.log.info(f"Successfully processed {len(final_data)} pages.")
+            self.log.info(
+                f"Successfully processed {len(final_data)} pages."
+            )
+
             return final_data
-        
+
         except Exception as e:
-            self.log.error(f"Visual Parsing failed: {str(e)}")
+
+            self.log.exception(
+                f"Visual Parsing failed: {e}"
+            )
+
             return None
