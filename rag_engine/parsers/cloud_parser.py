@@ -12,15 +12,26 @@ class UniversalParser:
         self.log = get_logger("UniversalParser")
         
         api_key = config.get("LLAMA_CLOUD_API_KEY")
-        vision_model = config.get("VISION_MODEL", "openai-gpt4o-mini")
+        vision_model = config.get("VISION_MODEL", "openai-gpt-4o-mini")
         workers = config.get("PARSER_WORKERS", 1)
+
+        # REFINED "SMART HYBRID" INSTRUCTION
+        smart_instruction = """
+        This document contains a mix of standard text and visual elements. 
+        1. If a page is pure text, extract it accurately as Markdown.
+        2. IF AND ONLY IF a page contains images, flowcharts, or diagrams:
+           - Describe the visual content in detail within the context of the text.
+           - For flowcharts, describe the step-by-step logic.
+        3. For tables (whether images or text), always convert them to clean Markdown tables.
+        """
 
         self.parser = LlamaParse(
             api_key=api_key,
             result_type=ResultType.MD,
-            tier="agentic",
+            tier="agentic", # The agentic tier is required for this logic to work
             use_vendor_multimodal_model=True,
             vendor_multimodal_model_name=vision_model,
+            parsing_instruction=smart_instruction, # The "Brain" of the parser
             num_workers=workers,
             verbose=True,
             language="en"
