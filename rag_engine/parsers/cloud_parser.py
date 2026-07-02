@@ -16,7 +16,7 @@ class UniversalParser:
         workers = config.get("PARSER_WORKERS", 1)
 
         # REFINED "SMART HYBRID" INSTRUCTION
-        smart_instruction = """
+        smart_prompt = """
         This document contains a mix of standard text and visual elements. 
         1. If a page is pure text, extract it accurately as Markdown.
         2. IF AND ONLY IF a page contains images, flowcharts, or diagrams:
@@ -28,10 +28,10 @@ class UniversalParser:
         self.parser = LlamaParse(
             api_key=api_key,
             result_type=ResultType.MD,
-            tier="agentic", # The agentic tier is required for this logic to work
+            tier="agentic",
             use_vendor_multimodal_model=True,
             vendor_multimodal_model_name=vision_model,
-            parsing_instruction=smart_instruction, # The "Brain" of the parser
+            system_prompt=smart_prompt,
             num_workers=workers,
             verbose=True,
             language="en"
